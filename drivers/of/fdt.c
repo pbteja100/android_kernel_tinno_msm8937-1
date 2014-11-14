@@ -1059,8 +1059,14 @@ bool __init early_init_dt_verify(void *params)
 }
 
 
+<<<<<<< HEAD
 void __init early_init_dt_scan_nodes(void)
 {
+=======
+	of_fdt_crc32 = crc32_be(~0, initial_boot_params,
+				fdt_totalsize(initial_boot_params));
+
+>>>>>>> ff67f9fae... of/fdt: export fdt blob as /sys/firmware/fdt
 	/* Retrieve various information from the /chosen node */
 	of_scan_flat_dt(early_init_dt_scan_chosen, boot_command_line);
 
@@ -1143,8 +1149,17 @@ static ssize_t of_fdt_raw_read(struct file *filp, struct kobject *kobj,
 
 static int __init of_fdt_raw_init(void)
 {
+<<<<<<< HEAD
 	static struct bin_attribute of_fdt_raw_attr =
 		__BIN_ATTR(fdt, S_IRUSR, of_fdt_raw_read, NULL, 0);
+=======
+	static struct bin_attribute of_fdt_raw_attr = {
+		.attr = { .name = "fdt", .mode = S_IRUSR },
+		.read = of_fdt_raw_read,
+		.write = NULL,
+		.size = 0
+	};
+>>>>>>> ff67f9fae... of/fdt: export fdt blob as /sys/firmware/fdt
 
 	if (!initial_boot_params)
 		return 0;
