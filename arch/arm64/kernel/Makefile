@@ -42,9 +42,14 @@ arm64-obj-$(CONFIG_ARMV8_DEPRECATED)	+= armv8_deprecated.o
 arm64-obj-$(CONFIG_MSM_APP_API)		+= app_api.o
 arm64-obj-$(CONFIG_MSM_APP_SETTINGS)	+= app_setting.o
 
+<<<<<<< HEAD
 ifeq ($(CONFIG_KVM),y)
 arm64-obj-$(CONFIG_HARDEN_BRANCH_PREDICTOR)	+= bpi.o
 endif
+=======
+obj-$(CONFIG_SWP_EMULATE)	+= swp_emulate.o
+arm64-obj-$(CONFIG_KEXEC)		+= machine_kexec.o relocate_kernel.o
+>>>>>>> 2641ac797... Add kexec support for aarch64
 
 obj-y					+= $(arm64-obj-y) vdso/
 obj-m					+= $(arm64-obj-m)

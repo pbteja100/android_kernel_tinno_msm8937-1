@@ -25,7 +25,11 @@
 #include <asm/alternative.h>
 #include <asm/uaccess.h>
 
+<<<<<<< HEAD
 /*
+=======
+ /*
+>>>>>>> 2641ac797... Add kexec support for aarch64
  *     flush_dcache_louis()
  *
  *     Flush the D-cache up to the Level of Unification Inner Shareable

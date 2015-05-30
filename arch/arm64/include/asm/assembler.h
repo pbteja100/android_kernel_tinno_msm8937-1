@@ -27,6 +27,7 @@
 #include <asm/pgtable-hwdef.h>
 #include <asm/ptrace.h>
 #include <asm/thread_info.h>
+#include <asm/asm-offsets.h>
 
 /*
  * Stack pushing/popping (register pairs only). Equivalent to store decrement
@@ -178,6 +179,7 @@ lr	.req	x30		// link register
 	.endm
 
 /*
+<<<<<<< HEAD
  * Pseudo-ops for PC-relative adr/ldr/str <reg>, <symbol> where
  * <symbol> is within the range +/- 4 GB of the PC.
  */
@@ -226,6 +228,8 @@ lr	.req	x30		// link register
 	.endm
 
 /*
+=======
+>>>>>>> 2641ac797... Add kexec support for aarch64
  * vma_vm_mm - get mm pointer from vma pointer (vma->vm_mm)
  */
 	.macro	vma_vm_mm, rd, rn
@@ -258,6 +262,7 @@ lr	.req	x30		// link register
 	mov	\reg, #4			// bytes per word
 	lsl	\reg, \reg, \tmp		// actual cache line size
 	.endm
+<<<<<<< HEAD
 
 /*
  * tcr_set_idmap_t0sz - update TCR.T0SZ so that we can load the ID map
@@ -342,3 +347,5 @@ lr	.req	x30		// link register
 	.endm
 
 #endif	/* __ASM_ASSEMBLER_H */
+=======
+>>>>>>> 2641ac797... Add kexec support for aarch64
