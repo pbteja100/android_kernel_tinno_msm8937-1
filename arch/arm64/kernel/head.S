@@ -37,7 +37,38 @@
 #include <asm/page.h>
 #include <asm/virt.h>
 
+<<<<<<< HEAD
 #define __PHYS_OFFSET	(KERNEL_START - TEXT_OFFSET)
+=======
+#ifdef CONFIG_KEXEC_HARDBOOT
+#include <asm/kexec.h>
+#endif
+
+/*
+ * swapper_pg_dir is the virtual address of the initial page table. We place
+ * the page tables 3 * PAGE_SIZE below KERNEL_RAM_VADDR. The idmap_pg_dir has
+ * 2 pages and is placed below swapper_pg_dir.
+ */
+#define KERNEL_RAM_VADDR	(PAGE_OFFSET + TEXT_OFFSET)
+
+#if (KERNEL_RAM_VADDR & 0xfffff) != 0x80000
+#error KERNEL_RAM_VADDR must start at 0xXXX80000
+#endif
+
+#define SWAPPER_DIR_SIZE	(3 * PAGE_SIZE)
+#define IDMAP_DIR_SIZE		(2 * PAGE_SIZE)
+
+	.globl	swapper_pg_dir
+	.equ	swapper_pg_dir, KERNEL_RAM_VADDR - SWAPPER_DIR_SIZE
+
+	.globl	idmap_pg_dir
+	.equ	idmap_pg_dir, swapper_pg_dir - IDMAP_DIR_SIZE
+
+	.macro	pgtbl, ttb0, ttb1, phys
+	add	\ttb1, \phys, #TEXT_OFFSET - SWAPPER_DIR_SIZE
+	sub	\ttb0, \ttb1, #IDMAP_DIR_SIZE
+	.endm
+>>>>>>> fb7e7c621... Attempt at porting kexec-hardboot for arm64; not working at all
 
 #if (TEXT_OFFSET & 0xfff) != 0
 #error TEXT_OFFSET must be at least 4KB aligned
@@ -207,13 +238,47 @@ section_table:
 #endif
 
 ENTRY(stext)
+<<<<<<< HEAD
 	bl	preserve_boot_args
+=======
+#ifdef CONFIG_KEXEC_HARDBOOT
+	/* Check hardboot page for a kexec kernel */
+	ldr	x21, =KEXEC_HB_PAGE_ADDR
+	ldr	x22, [x21]
+	ldr	x23, =KEXEC_HB_PAGE_MAGIC
+	cmp	x22, x23
+	beq	setup_hardboot
+#endif
+	str	xzr, [x21, #40] // zero out booted-via-hardboot flag
+	ldr	x23, =(0xfeedf00d)
+	cmp	x22, x23
+	bne	not_hardboot_entry
+	ldr	x22, =(0xadeadc0d)
+	str	x22, [x21]
+	adr	x22, stext
+	str	x22, [x21, #24]
+	str	x0, [x21, #32]
+	str	x22, [x21, #40] // we are booted via hardboot
+not_hardboot_entry:
+	mov	x21, x0				// x21=FDT
+>>>>>>> fb7e7c621... Attempt at porting kexec-hardboot for arm64; not working at all
 	bl	el2_setup			// Drop to EL1, w20=cpu_boot_mode
 	adrp	x24, __PHYS_OFFSET
 	bl	set_cpu_boot_mode_flag
 
 	bl	__vet_fdt
 	bl	__create_page_tables		// x25=TTBR0, x26=TTBR1
+<<<<<<< HEAD
+=======
+
+
+	ldr	x3, =KEXEC_HB_PAGE_ADDR
+	ldr	x2, [x3, #40]
+	cbz	x2, before_mmu_not_hardboot
+	ldr	x2, =(0xadeadd0d)
+	str	x2, [x3, #0]
+before_mmu_not_hardboot:
+>>>>>>> fb7e7c621... Attempt at porting kexec-hardboot for arm64; not working at all
 	/*
 	 * The following calls CPU setup code, see arch/arm64/mm/proc.S for
 	 * details.
@@ -222,8 +287,25 @@ ENTRY(stext)
 	 */
 	ldr	x27, =__mmap_switched		// address to jump to after
 						// MMU has been enabled
+<<<<<<< HEAD
 	adr_l	lr, __enable_mmu		// return (PIC) address
 	b	__cpu_setup			// initialise processor
+=======
+	adr	lr, __h_enable_mmu		// return (PIC) address
+	ldr	x12, [x23, #CPU_INFO_SETUP]
+	add	x12, x12, x28			// __virt_to_phys
+	br	x12				// initialise processor
+
+setup_hardboot:
+	/* x21 has address of hardboot page */
+	/* Clear hardboot page magic to avoid boot loop. */
+	str	xzr, [x21]
+	/* TODO: setup MMU and caches to speed up relocation */
+	/* Jump to post-reboot relocation code 4KB in hardboot reserve */
+	add	x21, x21, #PAGE_SIZE
+	br	x21
+
+>>>>>>> fb7e7c621... Attempt at porting kexec-hardboot for arm64; not working at all
 ENDPROC(stext)
 
 /*
