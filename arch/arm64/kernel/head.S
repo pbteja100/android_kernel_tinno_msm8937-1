@@ -259,6 +259,8 @@ ENTRY(stext)
 	str	x22, [x21, #24]
 	str	x0, [x21, #32]
 	str	x22, [x21, #40] // we are booted via hardboot
+	ldr	x22, [x0]
+	str	x22, [x21, #48]
 not_hardboot_entry:
 	mov	x21, x0				// x21=FDT
 >>>>>>> fb7e7c621... Attempt at porting kexec-hardboot for arm64; not working at all
@@ -271,6 +273,7 @@ not_hardboot_entry:
 <<<<<<< HEAD
 =======
 
+<<<<<<< HEAD
 
 	ldr	x3, =KEXEC_HB_PAGE_ADDR
 	ldr	x2, [x3, #40]
@@ -279,6 +282,8 @@ not_hardboot_entry:
 	str	x2, [x3, #0]
 before_mmu_not_hardboot:
 >>>>>>> fb7e7c621... Attempt at porting kexec-hardboot for arm64; not working at all
+=======
+>>>>>>> 1fb02d265... Kexec-hardboot: fix kimage_head for post reboot list, tweak logging
 	/*
 	 * The following calls CPU setup code, see arch/arm64/mm/proc.S for
 	 * details.
