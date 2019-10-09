@@ -1207,3 +1207,10 @@ config TOUCHSCREEN_FT5364I
          module will be called ft5364i_ts.
 
 endif
+
+config TOUCHSCREEN_DOUBLETAP2WAKE
+	tristate "DoubleTap2Wake for touchscreens"
+	select TOUCHSCREEN_PREVENT_SLEEP
+	default n
+
+endif
