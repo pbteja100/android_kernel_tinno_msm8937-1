@@ -1212,5 +1212,3 @@ config TOUCHSCREEN_DOUBLETAP2WAKE
 	tristate "DoubleTap2Wake for touchscreens"
 	select TOUCHSCREEN_PREVENT_SLEEP
 	default n
-
-endif
