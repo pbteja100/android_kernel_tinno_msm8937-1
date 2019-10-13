@@ -27,6 +27,7 @@
 #include <asm/pgtable-hwdef.h>
 #include <asm/ptrace.h>
 #include <asm/thread_info.h>
+#include <asm/asm-offsets.h>
 
 /*
  * Stack pushing/popping (register pairs only). Equivalent to store decrement
