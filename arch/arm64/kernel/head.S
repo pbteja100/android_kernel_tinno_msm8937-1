@@ -37,6 +37,10 @@
 #include <asm/page.h>
 #include <asm/virt.h>
 
+#ifdef CONFIG_KEXEC_HARDBOOT
+#include <asm/kexec.h>
+#endif
+
 #define __PHYS_OFFSET	(KERNEL_START - TEXT_OFFSET)
 
 #if (TEXT_OFFSET & 0xfff) != 0
@@ -207,6 +211,25 @@ section_table:
 #endif
 
 ENTRY(stext)
+#ifdef CONFIG_KEXEC_HARDBOOT
+	/* Check hardboot page for a kexec kernel */
+	ldr	x21, =KEXEC_HB_PAGE_ADDR
+	ldr	x22, [x21]
+	ldr	x23, =KEXEC_HB_PAGE_MAGIC
+	cmp	x22, x23
+	beq	setup_hardboot
+#endif
+	str	xzr, [x21, #40] // zero out booted-via-hardboot flag
+	ldr	x23, =(0xfeedf00d)
+	cmp	x22, x23
+	bne	not_hardboot_entry
+	ldr	x22, =(0xadeadc0d)
+	str	x22, [x21]
+	adr	x22, stext
+	str	x22, [x21, #24]
+	str	x0, [x21, #32]
+	str	x22, [x21, #40] // we are booted via hardboot
+not_hardboot_entry:
 	bl	preserve_boot_args
 	bl	el2_setup			// Drop to EL1, w20=cpu_boot_mode
 	adrp	x24, __PHYS_OFFSET
@@ -214,6 +237,14 @@ ENTRY(stext)
 
 	bl	__vet_fdt
 	bl	__create_page_tables		// x25=TTBR0, x26=TTBR1
+
+
+ 	ldr	x3, =KEXEC_HB_PAGE_ADDR
+	ldr	x2, [x3, #40]
+	cbz	x2, before_mmu_not_hardboot
+	ldr	x2, =(0xadeadd0d)
+	str	x2, [x3, #0]
+before_mmu_not_hardboot:
 	/*
 	 * The following calls CPU setup code, see arch/arm64/mm/proc.S for
 	 * details.
@@ -224,6 +255,16 @@ ENTRY(stext)
 						// MMU has been enabled
 	adr_l	lr, __enable_mmu		// return (PIC) address
 	b	__cpu_setup			// initialise processor
+
+setup_hardboot:
+	/* x21 has address of hardboot page */
+	/* Clear hardboot page magic to avoid boot loop. */
+	str	xzr, [x21]
+	/* TODO: setup MMU and caches to speed up relocation */
+	/* Jump to post-reboot relocation code 4KB in hardboot reserve */
+	add	x21, x21, #PAGE_SIZE
+	br	x21
+
 ENDPROC(stext)
 
 /*
