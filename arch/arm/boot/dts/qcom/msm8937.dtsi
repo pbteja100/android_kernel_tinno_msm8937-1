@@ -56,6 +56,16 @@
 		#size-cells = <2>;
 		ranges;
 
+ 		ramoops_mem: ramoops_region@0 {
+			compatible = "removed-dma-pool", "ramoops";
+			linux,contiguous-region = <&ramoops_mem>;
+			no-map;
+			 /* Hardboot: reserve 1MB of space
+			 * before ramoops address of 0x0x9ff00000
+			 */
+			reg = <0x0 0x9FE00000 0x0 0x00400000>;
+		};
+
 		other_ext_mem: other_ext_region@0 {
 			compatible = "removed-dma-pool";
 			no-map;
